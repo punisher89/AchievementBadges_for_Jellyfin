@@ -1295,16 +1295,16 @@
                 '<div id="abSaPanelQuests" class="ab-panel" style="display:none;">' +
                     '<div class="ab-panel-card">' +
                         '<div style="display:flex; align-items:center; justify-content:space-between; gap:0.6em; flex-wrap:wrap;">' +
-                            '<h3 style="margin:0;">Daily quests</h3>' +
+                            '<h3 style="margin:0;">' + tr('quests.daily', 'Ежедневные задания') + '</h3>' +
                             '<div id="abSaDailyRerollSlot"></div>' +
                         '</div>' +
-                        '<div class="ab-muted" style="font-size:0.85em; margin:0.4em 0 0.85em;">Resets at midnight UTC. Everyone shares the same daily challenge.</div>' +
+                        '<div class="ab-muted" style="font-size:0.85em; margin:0.4em 0 0.85em;">' + tr('quests.daily_desc', 'Обновляется в полночь по UTC. У всех пользователей одно и то же ежедневное задание.') + '</div>' +
                         '<div id="abSaDailyQuest" data-i18n="common.loading">Loading...</div>' +
                         '<div style="display:flex; align-items:center; justify-content:space-between; gap:0.6em; margin-top:1.6em; flex-wrap:wrap;">' +
-                            '<h3 style="margin:0;">Weekly quests</h3>' +
+                            '<h3 style="margin:0;">' + tr('quests.weekly', 'Еженедельные задания') + '</h3>' +
                             '<div id="abSaWeeklyRerollSlot"></div>' +
                         '</div>' +
-                        '<div class="ab-muted" style="font-size:0.85em; margin:0.4em 0 0.85em;">Resets every Monday UTC. Bigger reward, harder target.</div>' +
+                        '<div class="ab-muted" style="font-size:0.85em; margin:0.4em 0 0.85em;">' + tr('quests.weekly_desc', 'Обновляется каждый понедельник по UTC. Награда больше, а цель сложнее.') + '</div>' +
                         '<div id="abSaWeeklyQuest" data-i18n="common.loading">Loading...</div>' +
                     '</div>' +
                 '</div>' +
@@ -1596,7 +1596,7 @@
             });
         } else {
             slot.innerHTML = '<span class="ab-quest-reroll-used"' +
-                ' title="Available again ' + (period === 'weekly' ? 'Monday UTC' : 'at UTC midnight') + '"' +
+                ' title="' + (period === 'weekly' ? tr('loadout.reroll.available_monday', 'Снова доступно в понедельник по UTC') : tr('loadout.reroll.available_midnight', 'Снова доступно в полночь по UTC')) + '"' +
                 ' style="background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.1); padding:0.4em 0.95em; border-radius:999px; font-size:0.72em; font-weight:700; letter-spacing:0.06em; display:inline-flex; align-items:center; gap:0.35em;">' +
                 diceSvg(12) + '<span>' + usedLabel + '</span>' +
             '</span>';
@@ -1627,6 +1627,20 @@
     // --- v2.0: Loadout (Power-ups + Shop + Cosmetics) ---
     var _loSubtabInit = false;
     var _loThemeApplied = '';
+
+    function localizeLoadoutMessage(message) {
+        var msg = String(message || '');
+        var m;
+        if ((m = /^Purchased (.+)\\.$/.exec(msg))) return tr('loadout.msg.purchased', 'Куплено: {name}.').replace('{name}', m[1]);
+        if ((m = /^(.+) unlocked\\.$/.exec(msg))) return tr('loadout.msg.unlocked', 'Открыто: {name}.').replace('{name}', m[1]);
+        if ((m = /^Not enough score\\. You have (\\d+), item costs (\\d+)\\.$/.exec(msg))) return tr('loadout.msg.not_enough_score', 'Недостаточно очков. У вас {have}, стоимость предмета — {cost}.').replace('{have}', m[1]).replace('{cost}', m[2]);
+        if (/^You already own that cosmetic\\.$/.test(msg)) return tr('loadout.msg.already_owned', 'Этот косметический предмет уже есть в вашей коллекции.');
+        if (/^Item not found in catalog\\.$/.test(msg)) return tr('loadout.msg.item_not_found', 'Предмет не найден в каталоге.');
+        if (/^Profile not found\\.$/.test(msg)) return tr('loadout.msg.profile_not_found', 'Профиль не найден.');
+        if (/^Equipped\\.$/.test(msg)) return tr('loadout.equip_success', 'Предмет экипирован.');
+        if (/^Unequipped\\.$/.test(msg)) return tr('loadout.unequip_success', 'Предмет снят.');
+        return msg;
+    }
 
     function loSetStatus(msg, isError) {
         var s = el('abSaLoStatus'); if (!s) return;
@@ -2163,11 +2177,11 @@
             } else {
                 foot = '<div class="ab-store-card-price' + (afford ? '' : ' off') + '">' +
                     '<span class="ab-store-card-price-num">' + (c.PriceScore || 0) + '</span>' +
-                    '<span class="ab-store-card-price-unit">score</span>' +
+                    '<span class="ab-store-card-price-unit">' + tr('loadout.shop.score', 'очков') + '</span>' +
                 '</div>' +
                 (afford
-                    ? '<button type="button" class="ab-store-cta sm" data-lo-buy="' + (c.Id || '') + '">BUY</button>'
-                    : '<button type="button" class="ab-store-cta sm off" disabled>LOCKED</button>'
+                    ? '<button type="button" class="ab-store-cta sm" data-lo-buy="' + (c.Id || '') + '">' + tr('loadout.shop.buy', 'КУПИТЬ') + '</button>'
+                    : '<button type="button" class="ab-store-cta sm off" disabled>' + tr('loadout.shop.locked', 'ЗАБЛОКИРОВАНО') + '</button>'
                 );
             }
 
@@ -2203,8 +2217,8 @@
                 var id = btn.getAttribute('data-lo-buy');
                 btn.disabled = true;
                 fetchJson('Plugins/AchievementBadges/users/' + userId + '/shop/purchase', 'POST', { ItemId: id })
-                    .then(function (r) { loSetStatus((r && r.Message) || 'Purchased.'); loadLoadout(); })
-                    .catch(function (e) { loSetStatus((e && e.message) || 'Purchase failed', true); btn.disabled = false; });
+                    .then(function (r) { loSetStatus(localizeLoadoutMessage((r && r.Message) || tr('loadout.purchase_success', 'Покупка выполнена.'))); loadLoadout(); })
+                    .catch(function (e) { loSetStatus(localizeLoadoutMessage((e && e.message) || tr('loadout.purchase_failed', 'Не удалось выполнить покупку.')), true); btn.disabled = false; });
             });
         });
 
@@ -2256,7 +2270,7 @@
         var host = el('abSaLoCosmeticsBody'); if (!host) return;
         var ownedItems = ((catalog && catalog.Cosmetics) || []).filter(function (c) { return owned[c.Id]; });
         if (!ownedItems.length) {
-            host.innerHTML = '<div class="ab-muted" style="padding:1em; border:1px dashed rgba(255,255,255,0.15); border-radius:10px;">You don\'t own any cosmetics yet. Buy or earn one in the Shop tab.</div>';
+            host.innerHTML = '<div class="ab-muted" style="padding:1em; border:1px dashed rgba(255,255,255,0.15); border-radius:10px;">' + tr('loadout.cos.empty', 'У вас пока нет косметических предметов. Купите или заработайте их во вкладке «Магазин».') + '</div>';
             return;
         }
         var groups = { ProfileTheme: [], BadgeFrame: [], RankTitle: [], Avatar: [], Background: [], ProfileBorder: [] };
@@ -2328,12 +2342,12 @@
                 btn.disabled = true;
                 fetchJson('Plugins/AchievementBadges/users/' + userId + '/cosmetics/equip', 'POST', { CosmeticId: btn.getAttribute('data-lo-equip') })
                     .then(function (r) {
-                        loSetStatus((r && r.Message) || 'Equipped.');
+                        loSetStatus(localizeLoadoutMessage((r && r.Message) || tr('loadout.equip_success', 'Предмет экипирован.')));
                         if (r) applyEquippedThemeStd(r.EquippedThemeId);
                         loadV2Cosmetics(true).then(function () { reapplyV2Visuals(); });
                         loadLoadout();
                     })
-                    .catch(function (e) { loSetStatus((e && e.message) || 'Equip failed', true); btn.disabled = false; });
+                    .catch(function (e) { loSetStatus(localizeLoadoutMessage((e && e.message) || tr('loadout.equip_failed', 'Не удалось экипировать предмет.')), true); btn.disabled = false; });
             });
         });
         host.querySelectorAll('button[data-lo-unequip]').forEach(function (btn) {
@@ -2341,12 +2355,12 @@
                 btn.disabled = true;
                 fetchJson('Plugins/AchievementBadges/users/' + userId + '/cosmetics/unequip?kind=' + encodeURIComponent(btn.getAttribute('data-lo-unequip')), 'POST', {})
                     .then(function (r) {
-                        loSetStatus((r && r.Message) || 'Unequipped.');
+                        loSetStatus(localizeLoadoutMessage((r && r.Message) || tr('loadout.unequip_success', 'Предмет снят.')));
                         applyEquippedThemeStd(null);
                         loadV2Cosmetics(true).then(function () { reapplyV2Visuals(); });
                         loadLoadout();
                     })
-                    .catch(function (e) { loSetStatus((e && e.message) || 'Unequip failed', true); btn.disabled = false; });
+                    .catch(function (e) { loSetStatus(localizeLoadoutMessage((e && e.message) || tr('loadout.unequip_failed', 'Не удалось снять предмет.')), true); btn.disabled = false; });
             });
         });
     }
