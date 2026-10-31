@@ -119,6 +119,7 @@
     <EmbeddedResource Update="Pages\translations\badges.pt.json" WithCulture="false" LogicalName="Jellyfin.Plugin.AchievementBadges.Pages.translations.badges.pt.json" />
     <EmbeddedResource Update="Pages\translations\badges.zh.json" WithCulture="false" LogicalName="Jellyfin.Plugin.AchievementBadges.Pages.translations.badges.zh.json" />
     <EmbeddedResource Update="Pages\translations\badges.ja.json" WithCulture="false" LogicalName="Jellyfin.Plugin.AchievementBadges.Pages.translations.badges.ja.json" />
+    <EmbeddedResource Update="Pages\translations\badges.ru.json" WithCulture="false" LogicalName="Jellyfin.Plugin.AchievementBadges.Pages.translations.badges.ru.json" />
   </ItemGroup>
 
 </Project>
