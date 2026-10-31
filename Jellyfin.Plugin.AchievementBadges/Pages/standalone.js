@@ -3853,7 +3853,8 @@
                     // Resolve the chosen language now (honor "default" -> admin).
                     var chosen = sel.value;
                     var pc = publicConfigGlobal || {};
-                    var adminLang = (pc.DefaultLanguage || pc.defaultLanguage || 'en').toString().toLowerCase();
+                    var adminLang = (pc.DefaultLanguage || pc.defaultLanguage || 'ru').toString().toLowerCase();
+                    if (adminLang === 'en') adminLang = 'ru';
                     var eff = (!chosen || chosen === 'default') ? adminLang : chosen;
                     // Keep the local prefs in sync with the user's choice.
                     prefs.Language = chosen;
@@ -4184,7 +4185,9 @@
             var p = parts[0] || {};
             var cfg = parts[1] || {};
             var userLang = (p.Language || p.language || 'default').toString().toLowerCase();
-            var adminLang = (cfg.DefaultLanguage || cfg.defaultLanguage || 'en').toString().toLowerCase();
+            var adminLang = (cfg.DefaultLanguage || cfg.defaultLanguage || 'ru').toString().toLowerCase();
+            // Russian is the default language in this fork unless a user explicitly selects another language.
+            if (adminLang === 'en') adminLang = 'ru';
             var effective = (userLang === 'default' || !userLang) ? adminLang : userLang;
             return loadTranslations(effective).then(function () {
                 applyStaticTranslations();
@@ -4723,7 +4726,8 @@
             var cfg = values[0] || {};
             var prefs = values[1] || {};
             var chosen = (prefs.Language || prefs.language || 'default').toString().toLowerCase();
-            var adminLanguage = (cfg.DefaultLanguage || cfg.defaultLanguage || 'en').toString().toLowerCase();
+            var adminLanguage = (cfg.DefaultLanguage || cfg.defaultLanguage || 'ru').toString().toLowerCase();
+            if (adminLanguage === 'en') adminLanguage = 'ru';
             var effectiveLanguage = !chosen || chosen === 'default' ? adminLanguage : chosen;
             return loadTranslations(effectiveLanguage).catch(function () { return {}; }).then(function () {
                 renderNativeNavigationSettings(findNativeUserSettingsHost(), prefs);
