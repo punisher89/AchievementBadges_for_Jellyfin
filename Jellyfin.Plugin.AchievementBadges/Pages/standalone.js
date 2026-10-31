@@ -3746,6 +3746,7 @@
                             '<option value="pt"' + (prefLang === 'pt' ? ' selected' : '') + '>' + tr('settings.language_pt', 'Português') + '</option>' +
                             '<option value="zh"' + (prefLang === 'zh' ? ' selected' : '') + '>' + tr('settings.language_zh', '中文') + '</option>' +
                             '<option value="ja"' + (prefLang === 'ja' ? ' selected' : '') + '>' + tr('settings.language_ja', '日本語') + '</option>' +
+                            '<option value="ru"' + (prefLang === 'ru' ? ' selected' : '') + '>' + tr('settings.language_ru', 'Русский') + '</option>' +
                         '</select>' +
                     '</div>' +
                     '<div class="ab-setting-row">' +
