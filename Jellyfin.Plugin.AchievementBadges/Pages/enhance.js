@@ -318,7 +318,7 @@
         var scorePts = badge.ScorePoints || badge.scorePoints || rarityScorePts[rarity] || 10;
         var label = isRare ? tr('toast.rare_achievement_unlocked', 'Rare achievement unlocked') : tr('toast.achievement_unlocked', 'Achievement unlocked');
         var title = badge.Title || badge.title || '';
-        var desc = badge.Description || badge.description || tr('toast.description_fallback', 'Keep watching to unlock more achievements.');
+        var desc = badge.Description || badge.description || tr('toast.description_fallback', 'Продолжайте смотреть, чтобы открывать новые достижения.');
         var styleVars =
             '--ab-color:' + shades.base + ';' +
             '--ab-color-lighter:' + shades.lighter + ';' +
@@ -358,7 +358,7 @@
                             '</div>' +
                         '</div>' +
                         '<div class="ab-xb-text-stage ab-xb-desc-stage">' +
-                            '<span class="ab-xb-desc-label">' + tr('toast.description_label', 'Achievement detail') + '</span>' +
+                            '<span class="ab-xb-desc-label">' + tr('toast.description_label', 'Описание достижения') + '</span>' +
                             '<span class="ab-xb-desc">' + escape(desc) + '</span>' +
                         '</div>' +
                     '</div>' +
