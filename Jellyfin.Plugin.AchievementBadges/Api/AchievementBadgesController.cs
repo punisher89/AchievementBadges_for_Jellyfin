@@ -1463,6 +1463,19 @@ public class AchievementBadgesController : ControllerBase
             .OrderByDescending(b => b.UnlockedAt)
             .ToList();
 
+        // Toast payloads are independent of the achievements page, so localize
+        // badge titles/descriptions here before enhance.js renders notifications.
+        var language = (preferences.Language ?? "default").Trim().ToLowerInvariant();
+        if (string.IsNullOrEmpty(language) || language == "default")
+        {
+            language = (Plugin.Instance?.Configuration?.DefaultLanguage ?? "ru").Trim().ToLowerInvariant();
+        }
+        if (language == "en") language = "ru";
+        foreach (var badge in badges)
+        {
+            BadgeLocalizer.Localize(badge, language);
+        }
+
         return Ok(new { Now = DateTimeOffset.UtcNow, Badges = badges });
     }
 
