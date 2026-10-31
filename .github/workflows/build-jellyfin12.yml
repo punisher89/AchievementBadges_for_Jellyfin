@@ -1,0 +1,57 @@
+name: Build Jellyfin 12 (Russian branch)
+
+on:
+  push:
+    branches:
+      - ru-localization
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "true"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore Jellyfin.Plugin.AchievementBadges/Jellyfin.Plugin.AchievementBadges.csproj --locked-mode
+
+      - name: Build Jellyfin 12 plugin
+        run: dotnet publish Jellyfin.Plugin.AchievementBadges/Jellyfin.Plugin.AchievementBadges.csproj --configuration Release --framework net10.0 --no-restore --output dist/build-net10.0
+
+      - name: Verify assembly version
+        shell: pwsh
+        run: |
+          $dll = (Resolve-Path "dist/build-net10.0/Jellyfin.Plugin.AchievementBadges.dll").Path
+          $version = [System.Reflection.AssemblyName]::GetAssemblyName($dll).Version.ToString()
+          if ($version -ne "2.4.2.1") {
+            throw "Expected Jellyfin 12 assembly version 2.4.2.1, got $version"
+          }
+          Write-Host "Verified Jellyfin 12 assembly version: $version"
+
+      - name: Package plugin
+        run: |
+          mkdir -p dist/package/Jellyfin.Plugin.AchievementBadges
+          cp dist/build-net10.0/Jellyfin.Plugin.AchievementBadges.dll dist/package/Jellyfin.Plugin.AchievementBadges/
+          cd dist/package
+          zip -r ../Jellyfin.Plugin.AchievementBadges_2.4.2.1.zip Jellyfin.Plugin.AchievementBadges
+
+      - name: Upload Jellyfin 12 ZIP
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: AchievementBadges-Jellyfin12-ru
+          path: dist/Jellyfin.Plugin.AchievementBadges_2.4.2.1.zip
+          if-no-files-found: error
