@@ -149,7 +149,7 @@ public class PluginConfiguration : BasePluginConfiguration
 
     // Default UI language when a user hasn't picked one. Supported:
     // "en", "fr", "es", "de", "it", "pt", "zh", "ja", "ru".
-    public string DefaultLanguage { get; set; } = "en";
+    public string DefaultLanguage { get; set; } = "ru";
 
     // [issue #43] Default achievements UI style for users who have not used the
     // Classic/Revamp toggle. "classic" or "revamp"; anything else is treated as
