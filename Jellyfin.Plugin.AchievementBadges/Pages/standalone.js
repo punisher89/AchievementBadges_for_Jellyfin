@@ -1575,7 +1575,7 @@
         var usedLabel  = (period === 'weekly')
             ? tr('loadout.reroll.used_weekly', 'REROLLED THIS WEEK')
             : tr('loadout.reroll.used_daily', 'REROLLED TODAY');
-        var tip        = (period === 'weekly') ? 'Reroll this week\'s quests (1 per ISO week)' : 'Reroll today\'s daily set (1 per UTC day)';
+        var tip        = (period === 'weekly') ? tr('loadout.reroll.tip_weekly', 'Обновить набор заданий на эту неделю (1 раз в неделю по ISO).') : tr('loadout.reroll.tip_daily', 'Обновить ежедневный набор заданий (1 раз в сутки по UTC).');
         if (canReroll) {
             slot.innerHTML = '<button type="button" class="ab-quest-reroll"' +
                 ' title="' + tip + '"' +
@@ -1637,6 +1637,10 @@
         if (/^You already own that cosmetic\\.$/.test(msg)) return tr('loadout.msg.already_owned', 'Этот косметический предмет уже есть в вашей коллекции.');
         if (/^Item not found in catalog\\.$/.test(msg)) return tr('loadout.msg.item_not_found', 'Предмет не найден в каталоге.');
         if (/^Profile not found\\.$/.test(msg)) return tr('loadout.msg.profile_not_found', 'Профиль не найден.');
+        if (/^You don't have any (.+) to use\\.$/.test(msg)) return tr('loadout.msg.no_powerup', 'У вас нет доступных усилений: {name}.').replace('{name}', msg.match(/^You don't have any (.+) to use\\.$/)[1]);
+        if (/^You already have a Double Credit primed\\. Watch something first\\.$/.test(msg)) return tr('loadout.msg.double_credit_pending', 'Двойной зачёт уже активирован. Сначала посмотрите что-нибудь.');
+        if (/^Streak Freeze is consumed automatically/.test(msg)) return tr('loadout.msg.streak_auto', 'Заморозка серии используется автоматически, когда вы пропускаете день.');
+        if (/^.+ activated\\.$/.test(msg)) return tr('loadout.used', 'Усиление активировано.');
         if (/^Equipped\\.$/.test(msg)) return tr('loadout.equip_success', 'Предмет экипирован.');
         if (/^Unequipped\\.$/.test(msg)) return tr('loadout.unequip_success', 'Предмет снят.');
         return msg;
