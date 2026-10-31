@@ -148,7 +148,7 @@ public class PluginConfiguration : BasePluginConfiguration
     public string WelcomeMessage { get; set; } = "";
 
     // Default UI language when a user hasn't picked one. Supported:
-    // "en", "fr", "es", "de", "it", "pt", "zh", "ja".
+    // "en", "fr", "es", "de", "it", "pt", "zh", "ja", "ru".
     public string DefaultLanguage { get; set; } = "en";
 
     // [issue #43] Default achievements UI style for users who have not used the
