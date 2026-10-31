@@ -1148,5 +1148,12 @@
   "loadout.msg.item_not_found": "Предмет не найден в каталоге.",
   "loadout.msg.profile_not_found": "Профиль не найден.",
   "toast.description_fallback": "Продолжайте смотреть, чтобы открывать новые достижения.",
-  "toast.description_label": "Описание достижения"
+  "toast.description_label": "Описание достижения",
+  "loadout.reroll.tip_weekly": "Обновить набор заданий на эту неделю (1 раз в неделю по ISO).",
+  "loadout.reroll.tip_daily": "Обновить ежедневный набор заданий (1 раз в сутки по UTC).",
+  "loadout.msg.no_powerup": "У вас нет доступных усилений: {name}.",
+  "loadout.msg.double_credit_pending": "Двойной зачёт уже активирован. Сначала посмотрите что-нибудь.",
+  "loadout.msg.streak_auto": "Заморозка серии используется автоматически, когда вы пропускаете день.",
+  "loadout.used": "Усиление активировано.",
+  "loadout.use_failed": "Не удалось использовать усиление."
 }
