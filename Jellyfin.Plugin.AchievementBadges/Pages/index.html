@@ -1632,7 +1632,7 @@ font-size:0.88em;
                     function cur() {
                         try {
                             if (typeof window.abCurrentLanguage === 'function') return window.abCurrentLanguage();
-                            return (window.localStorage && localStorage.getItem('achievementBadgesLang')) || 'en';
+                            return (window.localStorage && localStorage.getItem('achievementBadgesLang')) || 'ru';
                         } catch (e) { return 'en'; }
                     }
                     // Reflect the active language once the i18n layer has resolved it.
@@ -2559,7 +2559,7 @@ font-size:0.88em;
         try { loadForLang(pickLang()).catch(function () {}); } catch (e) {}
 
         waitForApiClient(5000).then(function (apiClient) {
-            var adminLang = 'en';
+            var adminLang = 'ru';
             var userId = '';
             try {
                 if (apiClient && typeof apiClient.getCurrentUserId === 'function') {
@@ -2590,6 +2590,7 @@ font-size:0.88em;
                 .then(function (cfg) {
                     if (cfg && (cfg.DefaultLanguage || cfg.defaultLanguage)) {
                         adminLang = (cfg.DefaultLanguage || cfg.defaultLanguage).toLowerCase();
+                        if (adminLang === 'en') adminLang = 'ru';
                     }
                     if (!userId) return null;
                     return fetch(absUrl('Plugins/AchievementBadges/users/' + userId + '/preferences'), { headers: authHeaders(), credentials: 'same-origin' })
@@ -4501,7 +4502,7 @@ font-size:0.88em;
             document.getElementById('abFcDisabledBadgeCategories').value = (c.DisabledBadgeCategories || []).join(', ');
             document.getElementById('abFcWelcomeMessage').value = c.WelcomeMessage || '';
             var dlSel = document.getElementById('abFcDefaultLanguage');
-            if (dlSel) dlSel.value = (c.DefaultLanguage || 'en');
+            if (dlSel) dlSel.value = (c.DefaultLanguage || 'ru') === 'en' ? 'ru' : (c.DefaultLanguage || 'ru');
             var uiSel = document.getElementById('abFcDefaultUiStyle');
             if (uiSel) uiSel.value = (c.DefaultUiStyle === 'revamp' ? 'revamp' : 'classic');
             var forceUiEl = document.getElementById('abFcForceDefaultUiStyle');
@@ -4585,7 +4586,7 @@ font-size:0.88em;
             RestrictBadgeVisibility: document.getElementById('abFcRestrictBadgeVisibility').checked,
             DisabledBadgeCategories: categories,
             WelcomeMessage: document.getElementById('abFcWelcomeMessage').value || '',
-            DefaultLanguage: (document.getElementById('abFcDefaultLanguage') || {}).value || 'en',
+            DefaultLanguage: (document.getElementById('abFcDefaultLanguage') || {}).value || 'ru',
             DefaultUiStyle: (document.getElementById('abFcDefaultUiStyle') || {}).value === 'revamp' ? 'revamp' : 'classic',
             ForceDefaultUiStyle: !!(document.getElementById('abFcForceDefaultUiStyle') || {}).checked,
             DefaultToastPosition: (document.getElementById('abFcDefaultToastPosition') || {}).value || 'top-right',
