@@ -161,7 +161,8 @@
             var existingContainer = document.getElementById(TOAST_ID);
             if (existingContainer) positionToastContainer(existingContainer);
             var userLang = (prefs.Language || prefs.language || 'default').toString().toLowerCase();
-            var adminLang = (cfg.DefaultLanguage || cfg.defaultLanguage || 'en').toString().toLowerCase();
+            var adminLang = (cfg.DefaultLanguage || cfg.defaultLanguage || 'ru').toString().toLowerCase();
+            if (adminLang === 'en') adminLang = 'ru';
             var lang = (userLang === 'default' || !userLang) ? adminLang : userLang;
             lang = (lang || 'en').replace(/[^a-z-]/g, '') || 'en';
             return fetch(buildUrl('Plugins/AchievementBadges/translations/' + lang), { headers: authHeaders(), credentials: 'include' })
