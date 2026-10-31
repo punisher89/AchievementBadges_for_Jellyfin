@@ -2433,8 +2433,8 @@ font-size:0.88em;
             // Sticky manual override (globe picker) wins over everything.
             var manual = (window.localStorage && localStorage.getItem('achievementBadgesLangManual')) || '';
             if (manual) return manual;
-            var stored = (window.localStorage && localStorage.getItem('achievementBadgesLang')) || '';
-            if (stored) return stored;
+            // Non-manual stored values were written by the old English default.
+            // Only the explicit globe-picker choice is sticky; otherwise use this fork's Russian default.
         } catch (e) { /* ignore */ }
         var nav = (navigator.language || navigator.userLanguage || 'en').toLowerCase().slice(0, 2);
         var supported = ['en','fr','es','de','it','pt','zh','ja','ru'];
