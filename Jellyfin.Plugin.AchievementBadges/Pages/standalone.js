@@ -60,9 +60,43 @@
     // Translate a badge rarity label (Common, Uncommon, Rare, Epic, Legendary, Mythic).
     function trRarity(r) {
         if (r == null || r === '') return '';
-        var raw = String(r);
+        var raw = String(r).trim();
         var key = 'rarity.' + raw.toLowerCase();
         if (translations && translations[key]) return translations[key];
+        if (currentLang === 'ru') {
+            var ruRarity = {
+                common: 'Обычная',
+                uncommon: 'Необычная',
+                rare: 'Редкая',
+                epic: 'Эпическая',
+                legendary: 'Легендарная',
+                mythic: 'Мифическая'
+            };
+            return ruRarity[raw.toLowerCase()] || raw;
+        }
+        return raw;
+    }
+
+    function trRank(name) {
+        if (name == null || name === '') return '';
+        var raw = String(name).trim();
+        var key = 'rank.' + raw.toLowerCase().replace(/[\\s-]+/g, '_');
+        if (translations && translations[key]) return translations[key];
+        if (currentLang === 'ru') {
+            var ruRanks = {
+                rookie: 'Новичок',
+                novice: 'Начинающий',
+                viewer: 'Зритель',
+                regular: 'Постоянный зритель',
+                enthusiast: 'Энтузиаст',
+                binger: 'Марафонец',
+                connoisseur: 'Знаток',
+                maestro: 'Мастер',
+                legend: 'Легенда',
+                immortal: 'Бессмертный'
+            };
+            return ruRanks[raw.toLowerCase().replace(/[\\s-]+/g, '_')] || raw;
+        }
         return raw;
     }
     // Load a language bundle from the server. Resolves even on failure so
@@ -2993,7 +3027,7 @@
                 '<div class="ab-feed-icon ' + rarityClass(b.Rarity) + '">' + icon(b.Icon) + '</div>' +
                 '<div class="ab-feed-body">' +
                     '<div class="ab-feed-text"><strong>' + escapeHtml(b.Title) + '</strong></div>' +
-                    '<div class="ab-feed-meta"><span class="' + rarityClass(b.Rarity) + '">' + b.Rarity + '</span> · ' + when + '</div>' +
+                    '<div class="ab-feed-meta"><span class="' + rarityClass(b.Rarity) + '">' + escapeHtml(trRarity(b.Rarity)) + '</span> · ' + when + '</div>' +
                 '</div>' +
             '</div>';
         }).join('');
@@ -3319,7 +3353,7 @@
             equipped.slice(0, 5).map(function (b) {
                 var color = LB_RARITY_COLORS[(b.Rarity || '').toLowerCase()] || '#9fb3c8';
                 var iconName = safeIcon(b.Icon);
-                return '<span title="' + escapeHtml(b.Title || '') + ' (' + escapeHtml(b.Rarity || '') + ')" ' +
+                return '<span title="' + escapeHtml(b.Title || '') + ' (' + escapeHtml(trRarity(b.Rarity)) + ')" ' +
                     'style="width:' + px + 'px;height:' + px + 'px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;' +
                     'background:' + color + '26;border:1.5px solid ' + color + ';box-shadow:0 0 8px ' + color + '55;">' +
                     '<span class="material-icons" style="font-family:Material Icons;font-size:' + Math.max(10, px - 6) + 'px;line-height:1;color:#fff;">' + iconName + '</span>' +
@@ -3404,7 +3438,7 @@
         var scFrame = (v2EquippedFrameId && v2EquippedFrameId !== 'frame-default') ? ' ' + v2EquippedFrameId : '';
         badges.forEach(function (b) {
             var c = document.createElement('div'); c.className = 'ab-sc-card' + scFrame;
-            c.innerHTML = '<div class="ab-sc-icon">' + icon(b.Icon) + '</div><div><div style="font-weight:700;">' + escapeHtml(b.Title) + '</div><div class="' + rarityClass(b.Rarity) + '" style="font-size:0.88em;">' + escapeHtml(b.Rarity) + '</div></div>';
+            c.innerHTML = '<div class="ab-sc-icon">' + icon(b.Icon) + '</div><div><div style="font-weight:700;">' + escapeHtml(b.Title) + '</div><div class="' + rarityClass(b.Rarity) + '" style="font-size:0.88em;">' + escapeHtml(trRarity(b.Rarity)) + '</div></div>';
             sc.appendChild(c);
         });
     }
@@ -3422,7 +3456,7 @@
             var c = document.createElement('div');
             c.className = 'ab-card' + frameCls;
             c.setAttribute('data-badge-id', b.Id);
-            c.innerHTML = '<div class="ab-card-h"><div class="ab-card-icon">' + icon(b.Icon) + '</div><div style="flex:1;"><div class="ab-card-title">' + escapeHtml(b.Title) + '</div><div class="ab-card-meta ' + rarityClass(b.Rarity) + '">' + escapeHtml(b.Rarity) + '</div></div></div>' +
+            c.innerHTML = '<div class="ab-card-h"><div class="ab-card-icon">' + icon(b.Icon) + '</div><div style="flex:1;"><div class="ab-card-title">' + escapeHtml(b.Title) + '</div><div class="ab-card-meta ' + rarityClass(b.Rarity) + '">' + escapeHtml(trRarity(b.Rarity)) + '</div></div></div>' +
                 '<div class="ab-footer"><div class="ab-unlocked">' + tr('badge.equipped_state', 'Equipped') + '</div><button type="button" class="ab-btn">' + tr('badge.unequip', 'Unequip') + '</button></div>';
             c.querySelector('button').addEventListener('click', function () { doUnequip(b.Id); });
             row.appendChild(c);
@@ -3999,7 +4033,7 @@
             var eta = badgeEtaMap[b.Id];
             var etaText = eta && eta.DaysRemaining != null ? '\u00b7 ' + tr('common.eta', 'ETA ~') + eta.DaysRemaining + tr('common.day_suffix', 'd') : '';
             return '<div class="ab-goal-card ' + rarityClass(b.Rarity) + '-border" data-badge="' + b.Id + '">' +
-                '<div class="ab-goal-label ' + rarityClass(b.Rarity) + '">' + (b.Rarity || '') + '</div>' +
+                '<div class="ab-goal-label ' + rarityClass(b.Rarity) + '">' + escapeHtml(trRarity(b.Rarity)) + '</div>' +
                 '<div class="ab-goal-text">' + escapeHtml(b.Title || '') + '</div>' +
                 '<div class="ab-goal-meta">' + cur + ' / ' + tar + ' (' + pct + '%) ' + etaText + '</div>' +
                 '<div style="height:4px; border-radius:2px; background:rgba(255,255,255,0.08); margin-top:0.5em; overflow:hidden;">' +
@@ -4193,7 +4227,7 @@
         // Resolve effective language: user preference wins ("default" means
         // fall back to admin-configured DefaultLanguage from public-config).
         // We kick this off early but don't block other requests on it.
-        Promise.all([
+        var languageReady = Promise.all([
             fetchJson('Plugins/AchievementBadges/users/' + userId + '/preferences').catch(function () { return null; }),
             fetchJson('Plugins/AchievementBadges/public-config').catch(function () { return null; })
         ]).then(function (parts) {
@@ -4226,6 +4260,7 @@
         }).catch(function () {});
 
         return Promise.all([
+            languageReady,
             // Every fetch now has its own .catch so a single 401/429/500 on
             // one endpoint can never leave the UI stuck on "Loading..."
             // (previously a rate-limit on /users/{id} would reject the whole
@@ -4243,8 +4278,8 @@
             fetchJson('Plugins/AchievementBadges/users/' + userId + '/streak-calendar?weeks=53').catch(function () { return null; }),
             fetchJson('Plugins/AchievementBadges/users/' + userId + '/preferences').catch(function () { return null; })
         ]).then(function (results) {
-            var badges = results[0], summary = results[1], equipped = results[2], lb = results[3], stats = results[4], rank = results[5];
-            var titleData = results[6], bankData = results[7], etaData = results[8], streakData = results[9], prefsData = results[10];
+            var badges = results[1], summary = results[2], equipped = results[3], lb = results[4], stats = results[5], rank = results[6];
+            var titleData = results[7], bankData = results[8], etaData = results[9], streakData = results[10], prefsData = results[11];
 
             badgeEtaMap = {};
             if (etaData && etaData.Etas) {
@@ -4308,7 +4343,7 @@
                     // Translate the auto rank tier name via the existing
                     // rank.* keys ("rank.connoisseur", etc). Falls back to
                     // the English name from the server if no translation.
-                    var tierLabel = tr('rank.' + (rank.Tier.Name || '').toLowerCase(), rank.Tier.Name);
+                    var tierLabel = trRank(rank.Tier.Name);
                     lbl.dataset.abTier = tierLabel || '';
                     if (v2EquippedTitleName) {
                         lbl.innerHTML =
@@ -4331,7 +4366,7 @@
                 var pct = el('abSaRankBarPct');
                 if (pct) {
                     if (rank.NextTier) {
-                        var nextTierLabel = tr('rank.' + (rank.NextTier.Name || '').toLowerCase(), rank.NextTier.Name);
+                        var nextTierLabel = trRank(rank.NextTier.Name);
                         pct.textContent = rank.Score + ' / ' + rank.NextTier.MinScore + ' ' + tr('achievements.to_next', 'to') + ' ' + nextTierLabel;
                     } else {
                         pct.textContent = tr('achievements.max_rank', 'Max rank');
