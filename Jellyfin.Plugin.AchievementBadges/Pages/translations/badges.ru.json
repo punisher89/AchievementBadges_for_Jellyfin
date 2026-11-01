@@ -934,5 +934,93 @@
   "book-series-finisher": {
     "title": "Завершитель книжных серий",
     "description": "Завершите 3 книжные серии."
+  },
+  "artist-sampler": {
+    "title": "Знакомство с исполнителем",
+    "description": "Прослушайте 10% треков одного исполнителя."
+  },
+  "artist-listener": {
+    "title": "Постоянный слушатель",
+    "description": "Прослушайте 25% треков одного исполнителя."
+  },
+  "artist-fan": {
+    "title": "Поклонник исполнителя",
+    "description": "Прослушайте 50% треков одного исполнителя."
+  },
+  "artist-devotee": {
+    "title": "Преданный поклонник",
+    "description": "Прослушайте 75% треков одного исполнителя."
+  },
+  "artist-discography": {
+    "title": "Полная дискография",
+    "description": "Прослушайте все треки исполнителя, имеющиеся в библиотеке."
+  },
+  "hidden-first-anniversary": {
+    "title": "Первая годовщина",
+    "description": "Смотрите контент в течение 365 разных дней."
+  },
+  "hidden-late-night-sage": {
+    "title": "Мастер ночных сеансов",
+    "description": "Проведите 100 ночных сеансов просмотра."
+  },
+  "hidden-quadruple-feature": {
+    "title": "Киномарафон из четырёх фильмов",
+    "description": "Посмотрите 4 фильма за один день."
+  },
+  "hidden-dawn-chorus": {
+    "title": "Песнь рассвета",
+    "description": "Проведите 50 ранних утренних сеансов."
+  },
+  "hidden-universal-watcher": {
+    "title": "Универсальный зритель",
+    "description": "Посмотрите материалы 15 разных жанров."
+  },
+  "hidden-archivist-supreme": {
+    "title": "Верховный архивариус",
+    "description": "Завершите 100 сериалов."
+  },
+  "hidden-deep-cut": {
+    "title": "Глубокое погружение",
+    "description": "Посмотрите материалы из 10 разных десятилетий."
+  },
+  "hidden-saga-marathon": {
+    "title": "Марафон саги",
+    "description": "Посмотрите один материал продолжительностью более 5 часов."
+  },
+  "game-first-boot": {
+    "title": "Первый запуск",
+    "description": "Сыграйте в игру в первый раз."
+  },
+  "game-arcade-regular": {
+    "title": "Завсегдатай аркады",
+    "description": "Проведите 25 игровых сеансов."
+  },
+  "game-arcade-rat": {
+    "title": "Игровой энтузиаст",
+    "description": "Проведите 100 игровых сеансов."
+  },
+  "game-cartridge-collector": {
+    "title": "Коллекционер картриджей",
+    "description": "Сыграйте в 10 разных игр."
+  },
+  "game-backlog": {
+    "title": "Игровая библиотека",
+    "description": "Сыграйте в 50 разных игр."
+  },
+  "game-marathon": {
+    "title": "Игровой марафон",
+    "description": "Играйте в течение 10 часов."
+  },
+  "game-long-haul": {
+    "title": "Долгая дистанция",
+    "description": "Играйте в течение 100 часов."
+  },
+  "game-console-wars": {
+    "title": "Битва платформ",
+    "description": "Играйте на 3 разных платформах."
+  },
+  "game-retro-sommelier": {
+    "title": "Знаток ретро-игр",
+    "description": "Играйте на 8 разных платформах."
   }
 }
