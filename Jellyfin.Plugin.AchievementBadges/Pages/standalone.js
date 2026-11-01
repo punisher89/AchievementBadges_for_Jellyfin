@@ -1625,7 +1625,10 @@
     }
 
     // --- v2.0: Loadout (Power-ups + Shop + Cosmetics) ---
-    var _loSubtabInit = false;
+    // Keep the delegated subtab handler attached to the current root.
+    // mountRoute can rebuild the root during Jellyfin navigation; a boolean
+    // "already initialized" flag would then leave the replacement buttons inert.
+    var _loSubtabRoot = null;
     var _loThemeApplied = '';
 
     function localizeLoadoutMessage(message) {
@@ -1653,14 +1656,32 @@
     }
 
     function loShowSubtab(name) {
+        if (['powerups', 'shop', 'cosmetics'].indexOf(name) < 0) return;
         ['powerups', 'shop', 'cosmetics'].forEach(function (id) {
             var p = el('abSaLoPanel' + id.charAt(0).toUpperCase() + id.slice(1));
             if (p) p.style.display = (id === name) ? '' : 'none';
         });
-        var btns = document.querySelectorAll('#abSaPanelLoadout .ab-tabs button[data-lo]');
+        var btns = root ? root.querySelectorAll('#abSaPanelLoadout .ab-tabs button[data-lo]') : [];
         for (var i = 0; i < btns.length; i++) {
             btns[i].classList.toggle('active', btns[i].getAttribute('data-lo') === name);
         }
+    }
+
+    // Delegate clicks from the stable root instead of binding to the three
+    // buttons during the first loadLoadout call. This survives root rebuilds,
+    // language changes and Custom Tabs / Plugin Pages remounts.
+    function wireLoadoutSubtabs() {
+        if (!root || _loSubtabRoot === root) return;
+        _loSubtabRoot = root;
+        root.addEventListener('click', function (event) {
+            var target = event.target;
+            var button = target && target.closest
+                ? target.closest('#abSaPanelLoadout button[data-lo]')
+                : null;
+            if (!button || !root.contains(button)) return;
+            event.preventDefault();
+            loShowSubtab(button.getAttribute('data-lo'));
+        });
     }
 
     // v2.0.x: revamp page section header reads from data-rv-label on the
@@ -1942,13 +1963,7 @@
 
     function loadLoadout() {
         if (!userId) return;
-        if (!_loSubtabInit) {
-            _loSubtabInit = true;
-            var subBtns = document.querySelectorAll('#abSaPanelLoadout .ab-tabs button[data-lo]');
-            for (var i = 0; i < subBtns.length; i++) {
-                (function (b) { b.addEventListener('click', function () { loShowSubtab(b.getAttribute('data-lo')); }); })(subBtns[i]);
-            }
-        }
+        wireLoadoutSubtabs();
         Promise.all([
             fetchJson('Plugins/AchievementBadges/users/' + userId + '/powerups'),
             fetchJson('Plugins/AchievementBadges/shop/catalog'),
@@ -4949,6 +4964,7 @@
             root = createRoot(!!host);
         }
         if (root.parentNode !== target) target.appendChild(root);
+        wireLoadoutSubtabs();
         activeHost = host || null;
         root.style.display = 'block';
         applyDocumentTitle();
