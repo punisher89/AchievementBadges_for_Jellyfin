@@ -308,15 +308,28 @@ public class AchievementBadgesController : ControllerBase
     public ActionResult<List<AchievementBadge>> GetBadgesForUser([FromRoute] string userId, [FromQuery] string? lang = null)
     {
         var badges = _badgeService.GetBadgesForUser(userId);
-        // [v2.1.0] Localize the returned clones (CloneBadge — safe, not the
-        // stored objects) when the caller passes ?lang=. The admin page's
-        // badge grid + equipped showcase pass the picker language so titles/
-        // descriptions match the rest of the UI instead of staying English.
-        if (!string.IsNullOrWhiteSpace(lang))
+        // Explicit ?lang= (admin picker) wins. Otherwise use this user's saved
+        // language preference; "default" is resolved by BadgeLocalizer against
+        // the administrator's configured language.
+        var effectiveLanguage = ResolveBadgeLanguage(userId, lang);
+        foreach (var badge in badges)
         {
-            foreach (var b in badges) Helpers.BadgeLocalizer.Localize(b, lang);
+            BadgeLocalizer.Localize(badge, effectiveLanguage);
         }
         return Ok(badges);
+    }
+
+    private string ResolveBadgeLanguage(string userId, string? requestedLanguage)
+    {
+        if (!string.IsNullOrWhiteSpace(requestedLanguage))
+        {
+            return requestedLanguage;
+        }
+
+        var preferences = _badgeService.GetUserPreferences(userId);
+        return string.IsNullOrWhiteSpace(preferences.Language)
+            ? "default"
+            : preferences.Language;
     }
 
     [HttpGet("users/{userId}/badge/{badgeId}")]
@@ -509,12 +522,10 @@ public class AchievementBadgesController : ControllerBase
     public ActionResult<List<AchievementBadge>> GetEquipped([FromRoute] string userId, [FromQuery] string? lang = null)
     {
         var badges = _badgeService.GetEquippedBadges(userId);
-        // [v2.1.0] Localize equipped/pinned badge clones too (fixes the
-        // showcase strip showing English names while the picker is set to
-        // another language).
-        if (!string.IsNullOrWhiteSpace(lang))
+        var effectiveLanguage = ResolveBadgeLanguage(userId, lang);
+        foreach (var badge in badges)
         {
-            foreach (var b in badges) Helpers.BadgeLocalizer.Localize(b, lang);
+            BadgeLocalizer.Localize(badge, effectiveLanguage);
         }
         return Ok(badges);
     }
@@ -1262,7 +1273,7 @@ public class AchievementBadgesController : ControllerBase
         // payload can't bloat the on-disk profile with megabytes of attacker-
         // supplied data. (The ASP.NET request body limit still caps total
         // size, but these are the fields we actually round-trip into JSON.)
-        var allowedLangs = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "default", "en", "fr", "es", "de", "it", "pt", "zh", "ja" };
+        var allowedLangs = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "default", "en", "fr", "es", "de", "it", "pt", "zh", "ja", "ru" };
         prefs.Language = string.IsNullOrWhiteSpace(prefs.Language) || !allowedLangs.Contains(prefs.Language)
             ? "default" : prefs.Language.ToLowerInvariant();
 
