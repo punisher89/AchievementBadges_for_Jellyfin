@@ -22,7 +22,7 @@ public static class BadgeLocalizer
 
     private static readonly HashSet<string> _supported = new(StringComparer.OrdinalIgnoreCase)
     {
-        "en", "fr", "es", "de", "it", "pt", "zh", "ja"
+        "en", "fr", "es", "de", "it", "pt", "zh", "ja", "ru"
     };
 
     private sealed class Entry

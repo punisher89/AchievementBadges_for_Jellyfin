@@ -60,9 +60,43 @@
     // Translate a badge rarity label (Common, Uncommon, Rare, Epic, Legendary, Mythic).
     function trRarity(r) {
         if (r == null || r === '') return '';
-        var raw = String(r);
+        var raw = String(r).trim();
         var key = 'rarity.' + raw.toLowerCase();
         if (translations && translations[key]) return translations[key];
+        if (currentLang === 'ru') {
+            var ruRarity = {
+                common: 'Обычная',
+                uncommon: 'Необычная',
+                rare: 'Редкая',
+                epic: 'Эпическая',
+                legendary: 'Легендарная',
+                mythic: 'Мифическая'
+            };
+            return ruRarity[raw.toLowerCase()] || raw;
+        }
+        return raw;
+    }
+
+    function trRank(name) {
+        if (name == null || name === '') return '';
+        var raw = String(name).trim();
+        var key = 'rank.' + raw.toLowerCase().replace(/[\\s-]+/g, '_');
+        if (translations && translations[key]) return translations[key];
+        if (currentLang === 'ru') {
+            var ruRanks = {
+                rookie: 'Новичок',
+                novice: 'Начинающий',
+                viewer: 'Зритель',
+                regular: 'Постоянный зритель',
+                enthusiast: 'Энтузиаст',
+                binger: 'Марафонец',
+                connoisseur: 'Знаток',
+                maestro: 'Мастер',
+                legend: 'Легенда',
+                immortal: 'Бессмертный'
+            };
+            return ruRanks[raw.toLowerCase().replace(/[\\s-]+/g, '_')] || raw;
+        }
         return raw;
     }
     // Load a language bundle from the server. Resolves even on failure so
@@ -1295,16 +1329,16 @@
                 '<div id="abSaPanelQuests" class="ab-panel" style="display:none;">' +
                     '<div class="ab-panel-card">' +
                         '<div style="display:flex; align-items:center; justify-content:space-between; gap:0.6em; flex-wrap:wrap;">' +
-                            '<h3 style="margin:0;">Daily quests</h3>' +
+                            '<h3 style="margin:0;">' + tr('quests.daily', 'Ежедневные задания') + '</h3>' +
                             '<div id="abSaDailyRerollSlot"></div>' +
                         '</div>' +
-                        '<div class="ab-muted" style="font-size:0.85em; margin:0.4em 0 0.85em;">Resets at midnight UTC. Everyone shares the same daily challenge.</div>' +
+                        '<div class="ab-muted" style="font-size:0.85em; margin:0.4em 0 0.85em;">' + tr('quests.daily_desc', 'Обновляется в полночь по UTC. У всех пользователей одно и то же ежедневное задание.') + '</div>' +
                         '<div id="abSaDailyQuest" data-i18n="common.loading">Loading...</div>' +
                         '<div style="display:flex; align-items:center; justify-content:space-between; gap:0.6em; margin-top:1.6em; flex-wrap:wrap;">' +
-                            '<h3 style="margin:0;">Weekly quests</h3>' +
+                            '<h3 style="margin:0;">' + tr('quests.weekly', 'Еженедельные задания') + '</h3>' +
                             '<div id="abSaWeeklyRerollSlot"></div>' +
                         '</div>' +
-                        '<div class="ab-muted" style="font-size:0.85em; margin:0.4em 0 0.85em;">Resets every Monday UTC. Bigger reward, harder target.</div>' +
+                        '<div class="ab-muted" style="font-size:0.85em; margin:0.4em 0 0.85em;">' + tr('quests.weekly_desc', 'Обновляется каждый понедельник по UTC. Награда больше, а цель сложнее.') + '</div>' +
                         '<div id="abSaWeeklyQuest" data-i18n="common.loading">Loading...</div>' +
                     '</div>' +
                 '</div>' +
@@ -1575,7 +1609,7 @@
         var usedLabel  = (period === 'weekly')
             ? tr('loadout.reroll.used_weekly', 'REROLLED THIS WEEK')
             : tr('loadout.reroll.used_daily', 'REROLLED TODAY');
-        var tip        = (period === 'weekly') ? 'Reroll this week\'s quests (1 per ISO week)' : 'Reroll today\'s daily set (1 per UTC day)';
+        var tip        = (period === 'weekly') ? tr('loadout.reroll.tip_weekly', 'Обновить набор заданий на эту неделю (1 раз в неделю по ISO).') : tr('loadout.reroll.tip_daily', 'Обновить ежедневный набор заданий (1 раз в сутки по UTC).');
         if (canReroll) {
             slot.innerHTML = '<button type="button" class="ab-quest-reroll"' +
                 ' title="' + tip + '"' +
@@ -1596,7 +1630,7 @@
             });
         } else {
             slot.innerHTML = '<span class="ab-quest-reroll-used"' +
-                ' title="Available again ' + (period === 'weekly' ? 'Monday UTC' : 'at UTC midnight') + '"' +
+                ' title="' + (period === 'weekly' ? tr('loadout.reroll.available_monday', 'Снова доступно в понедельник по UTC') : tr('loadout.reroll.available_midnight', 'Снова доступно в полночь по UTC')) + '"' +
                 ' style="background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.1); padding:0.4em 0.95em; border-radius:999px; font-size:0.72em; font-weight:700; letter-spacing:0.06em; display:inline-flex; align-items:center; gap:0.35em;">' +
                 diceSvg(12) + '<span>' + usedLabel + '</span>' +
             '</span>';
@@ -1625,8 +1659,29 @@
     }
 
     // --- v2.0: Loadout (Power-ups + Shop + Cosmetics) ---
-    var _loSubtabInit = false;
+    // Keep the delegated subtab handler attached to the current root.
+    // mountRoute can rebuild the root during Jellyfin navigation; a boolean
+    // "already initialized" flag would then leave the replacement buttons inert.
+    var _loSubtabRoot = null;
     var _loThemeApplied = '';
+
+    function localizeLoadoutMessage(message) {
+        var msg = String(message || '');
+        var m;
+        if ((m = /^Purchased (.+)\.$/.exec(msg))) return tr('loadout.msg.purchased', 'Куплено: {name}.').replace('{name}', m[1]);
+        if ((m = /^(.+) unlocked\.$/.exec(msg))) return tr('loadout.msg.unlocked', 'Открыто: {name}.').replace('{name}', m[1]);
+        if ((m = /^Not enough score\. You have (\d+), item costs (\d+)\.$/.exec(msg))) return tr('loadout.msg.not_enough_score', 'Недостаточно очков. У вас {have}, стоимость предмета — {cost}.').replace('{have}', m[1]).replace('{cost}', m[2]);
+        if (/^You already own that cosmetic\.$/.test(msg)) return tr('loadout.msg.already_owned', 'Этот косметический предмет уже есть в вашей коллекции.');
+        if (/^Item not found in catalog\.$/.test(msg)) return tr('loadout.msg.item_not_found', 'Предмет не найден в каталоге.');
+        if (/^Profile not found\.$/.test(msg)) return tr('loadout.msg.profile_not_found', 'Профиль не найден.');
+        if (/^You don't have any (.+) to use\.$/.test(msg)) return tr('loadout.msg.no_powerup', 'У вас нет доступных усилений: {name}.').replace('{name}', msg.match(/^You don't have any (.+) to use\.$/)[1]);
+        if (/^You already have a Double Credit primed\. Watch something first\.$/.test(msg)) return tr('loadout.msg.double_credit_pending', 'Двойной зачёт уже активирован. Сначала посмотрите что-нибудь.');
+        if (/^Streak Freeze is consumed automatically/.test(msg)) return tr('loadout.msg.streak_auto', 'Заморозка серии используется автоматически, когда вы пропускаете день.');
+        if (/^.+ activated\.$/.test(msg)) return tr('loadout.used', 'Усиление активировано.');
+        if (/^Equipped\.$/.test(msg)) return tr('loadout.equip_success', 'Предмет экипирован.');
+        if (/^Unequipped\.$/.test(msg)) return tr('loadout.unequip_success', 'Предмет снят.');
+        return msg;
+    }
 
     function loSetStatus(msg, isError) {
         var s = el('abSaLoStatus'); if (!s) return;
@@ -1635,14 +1690,32 @@
     }
 
     function loShowSubtab(name) {
+        if (['powerups', 'shop', 'cosmetics'].indexOf(name) < 0) return;
         ['powerups', 'shop', 'cosmetics'].forEach(function (id) {
             var p = el('abSaLoPanel' + id.charAt(0).toUpperCase() + id.slice(1));
             if (p) p.style.display = (id === name) ? '' : 'none';
         });
-        var btns = document.querySelectorAll('#abSaPanelLoadout .ab-tabs button[data-lo]');
+        var btns = root ? root.querySelectorAll('#abSaPanelLoadout .ab-tabs button[data-lo]') : [];
         for (var i = 0; i < btns.length; i++) {
             btns[i].classList.toggle('active', btns[i].getAttribute('data-lo') === name);
         }
+    }
+
+    // Delegate clicks from the stable root instead of binding to the three
+    // buttons during the first loadLoadout call. This survives root rebuilds,
+    // language changes and Custom Tabs / Plugin Pages remounts.
+    function wireLoadoutSubtabs() {
+        if (!root || _loSubtabRoot === root) return;
+        _loSubtabRoot = root;
+        root.addEventListener('click', function (event) {
+            var target = event.target;
+            var button = target && target.closest
+                ? target.closest('#abSaPanelLoadout button[data-lo]')
+                : null;
+            if (!button || !root.contains(button)) return;
+            event.preventDefault();
+            loShowSubtab(button.getAttribute('data-lo'));
+        });
     }
 
     // v2.0.x: revamp page section header reads from data-rv-label on the
@@ -1924,13 +1997,7 @@
 
     function loadLoadout() {
         if (!userId) return;
-        if (!_loSubtabInit) {
-            _loSubtabInit = true;
-            var subBtns = document.querySelectorAll('#abSaPanelLoadout .ab-tabs button[data-lo]');
-            for (var i = 0; i < subBtns.length; i++) {
-                (function (b) { b.addEventListener('click', function () { loShowSubtab(b.getAttribute('data-lo')); }); })(subBtns[i]);
-            }
-        }
+        wireLoadoutSubtabs();
         Promise.all([
             fetchJson('Plugins/AchievementBadges/users/' + userId + '/powerups'),
             fetchJson('Plugins/AchievementBadges/shop/catalog'),
@@ -2163,11 +2230,11 @@
             } else {
                 foot = '<div class="ab-store-card-price' + (afford ? '' : ' off') + '">' +
                     '<span class="ab-store-card-price-num">' + (c.PriceScore || 0) + '</span>' +
-                    '<span class="ab-store-card-price-unit">score</span>' +
+                    '<span class="ab-store-card-price-unit">' + tr('loadout.shop.score', 'очков') + '</span>' +
                 '</div>' +
                 (afford
-                    ? '<button type="button" class="ab-store-cta sm" data-lo-buy="' + (c.Id || '') + '">BUY</button>'
-                    : '<button type="button" class="ab-store-cta sm off" disabled>LOCKED</button>'
+                    ? '<button type="button" class="ab-store-cta sm" data-lo-buy="' + (c.Id || '') + '">' + tr('loadout.shop.buy', 'КУПИТЬ') + '</button>'
+                    : '<button type="button" class="ab-store-cta sm off" disabled>' + tr('loadout.shop.locked', 'ЗАБЛОКИРОВАНО') + '</button>'
                 );
             }
 
@@ -2203,8 +2270,8 @@
                 var id = btn.getAttribute('data-lo-buy');
                 btn.disabled = true;
                 fetchJson('Plugins/AchievementBadges/users/' + userId + '/shop/purchase', 'POST', { ItemId: id })
-                    .then(function (r) { loSetStatus((r && r.Message) || 'Purchased.'); loadLoadout(); })
-                    .catch(function (e) { loSetStatus((e && e.message) || 'Purchase failed', true); btn.disabled = false; });
+                    .then(function (r) { loSetStatus(localizeLoadoutMessage((r && r.Message) || tr('loadout.purchase_success', 'Покупка выполнена.'))); loadLoadout(); })
+                    .catch(function (e) { loSetStatus(localizeLoadoutMessage((e && e.message) || tr('loadout.purchase_failed', 'Не удалось выполнить покупку.')), true); btn.disabled = false; });
             });
         });
 
@@ -2256,7 +2323,7 @@
         var host = el('abSaLoCosmeticsBody'); if (!host) return;
         var ownedItems = ((catalog && catalog.Cosmetics) || []).filter(function (c) { return owned[c.Id]; });
         if (!ownedItems.length) {
-            host.innerHTML = '<div class="ab-muted" style="padding:1em; border:1px dashed rgba(255,255,255,0.15); border-radius:10px;">You don\'t own any cosmetics yet. Buy or earn one in the Shop tab.</div>';
+            host.innerHTML = '<div class="ab-muted" style="padding:1em; border:1px dashed rgba(255,255,255,0.15); border-radius:10px;">' + tr('loadout.cos.empty', 'У вас пока нет косметических предметов. Купите или заработайте их во вкладке «Магазин».') + '</div>';
             return;
         }
         var groups = { ProfileTheme: [], BadgeFrame: [], RankTitle: [], Avatar: [], Background: [], ProfileBorder: [] };
@@ -2328,12 +2395,12 @@
                 btn.disabled = true;
                 fetchJson('Plugins/AchievementBadges/users/' + userId + '/cosmetics/equip', 'POST', { CosmeticId: btn.getAttribute('data-lo-equip') })
                     .then(function (r) {
-                        loSetStatus((r && r.Message) || 'Equipped.');
+                        loSetStatus(localizeLoadoutMessage((r && r.Message) || tr('loadout.equip_success', 'Предмет экипирован.')));
                         if (r) applyEquippedThemeStd(r.EquippedThemeId);
                         loadV2Cosmetics(true).then(function () { reapplyV2Visuals(); });
                         loadLoadout();
                     })
-                    .catch(function (e) { loSetStatus((e && e.message) || 'Equip failed', true); btn.disabled = false; });
+                    .catch(function (e) { loSetStatus(localizeLoadoutMessage((e && e.message) || tr('loadout.equip_failed', 'Не удалось экипировать предмет.')), true); btn.disabled = false; });
             });
         });
         host.querySelectorAll('button[data-lo-unequip]').forEach(function (btn) {
@@ -2341,12 +2408,12 @@
                 btn.disabled = true;
                 fetchJson('Plugins/AchievementBadges/users/' + userId + '/cosmetics/unequip?kind=' + encodeURIComponent(btn.getAttribute('data-lo-unequip')), 'POST', {})
                     .then(function (r) {
-                        loSetStatus((r && r.Message) || 'Unequipped.');
+                        loSetStatus(localizeLoadoutMessage((r && r.Message) || tr('loadout.unequip_success', 'Предмет снят.')));
                         applyEquippedThemeStd(null);
                         loadV2Cosmetics(true).then(function () { reapplyV2Visuals(); });
                         loadLoadout();
                     })
-                    .catch(function (e) { loSetStatus((e && e.message) || 'Unequip failed', true); btn.disabled = false; });
+                    .catch(function (e) { loSetStatus(localizeLoadoutMessage((e && e.message) || tr('loadout.unequip_failed', 'Не удалось снять предмет.')), true); btn.disabled = false; });
             });
         });
     }
@@ -2960,7 +3027,7 @@
                 '<div class="ab-feed-icon ' + rarityClass(b.Rarity) + '">' + icon(b.Icon) + '</div>' +
                 '<div class="ab-feed-body">' +
                     '<div class="ab-feed-text"><strong>' + escapeHtml(b.Title) + '</strong></div>' +
-                    '<div class="ab-feed-meta"><span class="' + rarityClass(b.Rarity) + '">' + b.Rarity + '</span> · ' + when + '</div>' +
+                    '<div class="ab-feed-meta"><span class="' + rarityClass(b.Rarity) + '">' + escapeHtml(trRarity(b.Rarity)) + '</span> · ' + when + '</div>' +
                 '</div>' +
             '</div>';
         }).join('');
@@ -3286,7 +3353,7 @@
             equipped.slice(0, 5).map(function (b) {
                 var color = LB_RARITY_COLORS[(b.Rarity || '').toLowerCase()] || '#9fb3c8';
                 var iconName = safeIcon(b.Icon);
-                return '<span title="' + escapeHtml(b.Title || '') + ' (' + escapeHtml(b.Rarity || '') + ')" ' +
+                return '<span title="' + escapeHtml(b.Title || '') + ' (' + escapeHtml(trRarity(b.Rarity)) + ')" ' +
                     'style="width:' + px + 'px;height:' + px + 'px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;' +
                     'background:' + color + '26;border:1.5px solid ' + color + ';box-shadow:0 0 8px ' + color + '55;">' +
                     '<span class="material-icons" style="font-family:Material Icons;font-size:' + Math.max(10, px - 6) + 'px;line-height:1;color:#fff;">' + iconName + '</span>' +
@@ -3371,7 +3438,7 @@
         var scFrame = (v2EquippedFrameId && v2EquippedFrameId !== 'frame-default') ? ' ' + v2EquippedFrameId : '';
         badges.forEach(function (b) {
             var c = document.createElement('div'); c.className = 'ab-sc-card' + scFrame;
-            c.innerHTML = '<div class="ab-sc-icon">' + icon(b.Icon) + '</div><div><div style="font-weight:700;">' + escapeHtml(b.Title) + '</div><div class="' + rarityClass(b.Rarity) + '" style="font-size:0.88em;">' + escapeHtml(b.Rarity) + '</div></div>';
+            c.innerHTML = '<div class="ab-sc-icon">' + icon(b.Icon) + '</div><div><div style="font-weight:700;">' + escapeHtml(b.Title) + '</div><div class="' + rarityClass(b.Rarity) + '" style="font-size:0.88em;">' + escapeHtml(trRarity(b.Rarity)) + '</div></div>';
             sc.appendChild(c);
         });
     }
@@ -3389,7 +3456,7 @@
             var c = document.createElement('div');
             c.className = 'ab-card' + frameCls;
             c.setAttribute('data-badge-id', b.Id);
-            c.innerHTML = '<div class="ab-card-h"><div class="ab-card-icon">' + icon(b.Icon) + '</div><div style="flex:1;"><div class="ab-card-title">' + escapeHtml(b.Title) + '</div><div class="ab-card-meta ' + rarityClass(b.Rarity) + '">' + escapeHtml(b.Rarity) + '</div></div></div>' +
+            c.innerHTML = '<div class="ab-card-h"><div class="ab-card-icon">' + icon(b.Icon) + '</div><div style="flex:1;"><div class="ab-card-title">' + escapeHtml(b.Title) + '</div><div class="ab-card-meta ' + rarityClass(b.Rarity) + '">' + escapeHtml(trRarity(b.Rarity)) + '</div></div></div>' +
                 '<div class="ab-footer"><div class="ab-unlocked">' + tr('badge.equipped_state', 'Equipped') + '</div><button type="button" class="ab-btn">' + tr('badge.unequip', 'Unequip') + '</button></div>';
             c.querySelector('button').addEventListener('click', function () { doUnequip(b.Id); });
             row.appendChild(c);
@@ -3746,6 +3813,7 @@
                             '<option value="pt"' + (prefLang === 'pt' ? ' selected' : '') + '>' + tr('settings.language_pt', 'Português') + '</option>' +
                             '<option value="zh"' + (prefLang === 'zh' ? ' selected' : '') + '>' + tr('settings.language_zh', '中文') + '</option>' +
                             '<option value="ja"' + (prefLang === 'ja' ? ' selected' : '') + '>' + tr('settings.language_ja', '日本語') + '</option>' +
+                            '<option value="ru"' + (prefLang === 'ru' ? ' selected' : '') + '>' + tr('settings.language_ru', 'Русский') + '</option>' +
                         '</select>' +
                     '</div>' +
                     '<div class="ab-setting-row">' +
@@ -3834,7 +3902,8 @@
                     // Resolve the chosen language now (honor "default" -> admin).
                     var chosen = sel.value;
                     var pc = publicConfigGlobal || {};
-                    var adminLang = (pc.DefaultLanguage || pc.defaultLanguage || 'en').toString().toLowerCase();
+                    var adminLang = (pc.DefaultLanguage || pc.defaultLanguage || 'ru').toString().toLowerCase();
+                    if (adminLang === 'en') adminLang = 'ru';
                     var eff = (!chosen || chosen === 'default') ? adminLang : chosen;
                     // Keep the local prefs in sync with the user's choice.
                     prefs.Language = chosen;
@@ -3964,7 +4033,7 @@
             var eta = badgeEtaMap[b.Id];
             var etaText = eta && eta.DaysRemaining != null ? '\u00b7 ' + tr('common.eta', 'ETA ~') + eta.DaysRemaining + tr('common.day_suffix', 'd') : '';
             return '<div class="ab-goal-card ' + rarityClass(b.Rarity) + '-border" data-badge="' + b.Id + '">' +
-                '<div class="ab-goal-label ' + rarityClass(b.Rarity) + '">' + (b.Rarity || '') + '</div>' +
+                '<div class="ab-goal-label ' + rarityClass(b.Rarity) + '">' + escapeHtml(trRarity(b.Rarity)) + '</div>' +
                 '<div class="ab-goal-text">' + escapeHtml(b.Title || '') + '</div>' +
                 '<div class="ab-goal-meta">' + cur + ' / ' + tar + ' (' + pct + '%) ' + etaText + '</div>' +
                 '<div style="height:4px; border-radius:2px; background:rgba(255,255,255,0.08); margin-top:0.5em; overflow:hidden;">' +
@@ -4158,14 +4227,16 @@
         // Resolve effective language: user preference wins ("default" means
         // fall back to admin-configured DefaultLanguage from public-config).
         // We kick this off early but don't block other requests on it.
-        Promise.all([
+        var languageReady = Promise.all([
             fetchJson('Plugins/AchievementBadges/users/' + userId + '/preferences').catch(function () { return null; }),
             fetchJson('Plugins/AchievementBadges/public-config').catch(function () { return null; })
         ]).then(function (parts) {
             var p = parts[0] || {};
             var cfg = parts[1] || {};
             var userLang = (p.Language || p.language || 'default').toString().toLowerCase();
-            var adminLang = (cfg.DefaultLanguage || cfg.defaultLanguage || 'en').toString().toLowerCase();
+            var adminLang = (cfg.DefaultLanguage || cfg.defaultLanguage || 'ru').toString().toLowerCase();
+            // Russian is the default language in this fork unless a user explicitly selects another language.
+            if (adminLang === 'en') adminLang = 'ru';
             var effective = (userLang === 'default' || !userLang) ? adminLang : userLang;
             return loadTranslations(effective).then(function () {
                 applyStaticTranslations();
@@ -4189,6 +4260,7 @@
         }).catch(function () {});
 
         return Promise.all([
+            languageReady,
             // Every fetch now has its own .catch so a single 401/429/500 on
             // one endpoint can never leave the UI stuck on "Loading..."
             // (previously a rate-limit on /users/{id} would reject the whole
@@ -4206,8 +4278,8 @@
             fetchJson('Plugins/AchievementBadges/users/' + userId + '/streak-calendar?weeks=53').catch(function () { return null; }),
             fetchJson('Plugins/AchievementBadges/users/' + userId + '/preferences').catch(function () { return null; })
         ]).then(function (results) {
-            var badges = results[0], summary = results[1], equipped = results[2], lb = results[3], stats = results[4], rank = results[5];
-            var titleData = results[6], bankData = results[7], etaData = results[8], streakData = results[9], prefsData = results[10];
+            var badges = results[1], summary = results[2], equipped = results[3], lb = results[4], stats = results[5], rank = results[6];
+            var titleData = results[7], bankData = results[8], etaData = results[9], streakData = results[10], prefsData = results[11];
 
             badgeEtaMap = {};
             if (etaData && etaData.Etas) {
@@ -4271,7 +4343,7 @@
                     // Translate the auto rank tier name via the existing
                     // rank.* keys ("rank.connoisseur", etc). Falls back to
                     // the English name from the server if no translation.
-                    var tierLabel = tr('rank.' + (rank.Tier.Name || '').toLowerCase(), rank.Tier.Name);
+                    var tierLabel = trRank(rank.Tier.Name);
                     lbl.dataset.abTier = tierLabel || '';
                     if (v2EquippedTitleName) {
                         lbl.innerHTML =
@@ -4294,7 +4366,7 @@
                 var pct = el('abSaRankBarPct');
                 if (pct) {
                     if (rank.NextTier) {
-                        var nextTierLabel = tr('rank.' + (rank.NextTier.Name || '').toLowerCase(), rank.NextTier.Name);
+                        var nextTierLabel = trRank(rank.NextTier.Name);
                         pct.textContent = rank.Score + ' / ' + rank.NextTier.MinScore + ' ' + tr('achievements.to_next', 'to') + ' ' + nextTierLabel;
                     } else {
                         pct.textContent = tr('achievements.max_rank', 'Max rank');
@@ -4704,7 +4776,8 @@
             var cfg = values[0] || {};
             var prefs = values[1] || {};
             var chosen = (prefs.Language || prefs.language || 'default').toString().toLowerCase();
-            var adminLanguage = (cfg.DefaultLanguage || cfg.defaultLanguage || 'en').toString().toLowerCase();
+            var adminLanguage = (cfg.DefaultLanguage || cfg.defaultLanguage || 'ru').toString().toLowerCase();
+            if (adminLanguage === 'en') adminLanguage = 'ru';
             var effectiveLanguage = !chosen || chosen === 'default' ? adminLanguage : chosen;
             return loadTranslations(effectiveLanguage).catch(function () { return {}; }).then(function () {
                 renderNativeNavigationSettings(findNativeUserSettingsHost(), prefs);
@@ -4926,6 +4999,7 @@
             root = createRoot(!!host);
         }
         if (root.parentNode !== target) target.appendChild(root);
+        wireLoadoutSubtabs();
         activeHost = host || null;
         root.style.display = 'block';
         applyDocumentTitle();

@@ -161,7 +161,8 @@
             var existingContainer = document.getElementById(TOAST_ID);
             if (existingContainer) positionToastContainer(existingContainer);
             var userLang = (prefs.Language || prefs.language || 'default').toString().toLowerCase();
-            var adminLang = (cfg.DefaultLanguage || cfg.defaultLanguage || 'en').toString().toLowerCase();
+            var adminLang = (cfg.DefaultLanguage || cfg.defaultLanguage || 'ru').toString().toLowerCase();
+            if (adminLang === 'en') adminLang = 'ru';
             var lang = (userLang === 'default' || !userLang) ? adminLang : userLang;
             lang = (lang || 'en').replace(/[^a-z-]/g, '') || 'en';
             return fetch(buildUrl('Plugins/AchievementBadges/translations/' + lang), { headers: authHeaders(), credentials: 'include' })
@@ -318,7 +319,7 @@
         var scorePts = badge.ScorePoints || badge.scorePoints || rarityScorePts[rarity] || 10;
         var label = isRare ? tr('toast.rare_achievement_unlocked', 'Rare achievement unlocked') : tr('toast.achievement_unlocked', 'Achievement unlocked');
         var title = badge.Title || badge.title || '';
-        var desc = badge.Description || badge.description || tr('toast.description_fallback', 'Keep watching to unlock more achievements.');
+        var desc = badge.Description || badge.description || tr('toast.description_fallback', 'Продолжайте смотреть, чтобы открывать новые достижения.');
         var styleVars =
             '--ab-color:' + shades.base + ';' +
             '--ab-color-lighter:' + shades.lighter + ';' +
@@ -358,7 +359,7 @@
                             '</div>' +
                         '</div>' +
                         '<div class="ab-xb-text-stage ab-xb-desc-stage">' +
-                            '<span class="ab-xb-desc-label">' + tr('toast.description_label', 'Achievement detail') + '</span>' +
+                            '<span class="ab-xb-desc-label">' + tr('toast.description_label', 'Описание достижения') + '</span>' +
                             '<span class="ab-xb-desc">' + escape(desc) + '</span>' +
                         '</div>' +
                     '</div>' +
